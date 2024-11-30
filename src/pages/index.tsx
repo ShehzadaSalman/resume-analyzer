@@ -210,14 +210,14 @@ function Home() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Skills Analysis
                 </h3>
-                <SkillsAnalysis skills={mockDetailedSkills} />
+                <SkillsAnalysis skills={[...mockDetailedSkills]} />
               </div>
 
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Red Flags
                 </h3>
-                <RedFlags flags={mockRedFlags} />
+                <RedFlags flags={[...mockRedFlags]} />
               </div>
             </div>
 
@@ -269,6 +269,6 @@ function Home() {
       </footer>
     </div>
   );
-}
 
+}
 export default Home;
