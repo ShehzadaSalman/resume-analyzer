@@ -54,19 +54,20 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const file = req.body.file; // Assuming the PDF is sent as base64
+    try {
+      const file = req.body.file; // Assuming the PDF is sent as base64
 
-    // Parse the PDF file
-    const dataBuffer = Buffer.from(file, "base64");
-    const pdfData = await pdf(dataBuffer);
+      // Parse the PDF file
+      const dataBuffer = Buffer.from(file, "base64");
+      const pdfData = await pdf(dataBuffer);
 
-    const RESUME_CONTENT = pdfData.text; // Assuming pdfData.text contains the extracted text
+      const RESUME_CONTENT = pdfData.text; // Assuming pdfData.text contains the extracted text
 
-    const chatCompletion = await client.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content: `You are an expert resume analyzer with deep expertise in talent acquisition, human resources, and career development. Your task is to conduct a thorough and professional analysis of the following resume content, providing a comprehensive breakdown that goes beyond surface-level observations.
+      const chatCompletion = await client.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: `You are an expert resume analyzer with deep expertise in talent acquisition, human resources, and career development. Your task is to conduct a thorough and professional analysis of the following resume content, providing a comprehensive breakdown that goes beyond surface-level observations.
 
           Resume Content:
           ${RESUME_CONTENT}
@@ -127,22 +128,27 @@ export default async function handler(
           Respond strictly in the format of the ${JSON.stringify(
             resumeAnalysis
           )} object, ensuring all fields are populated with meaningful, data-driven insights.`,
-        },
-      ],
-      model: "gpt-4o-mini",
-      max_tokens: 1000,
-    });
+          },
+        ],
+        model: "gpt-4o-mini",
+        max_tokens: 1000,
+      });
 
-    const reportRep = chatCompletion.choices[0].message.content;
-    let report;
-    try {
-      console.log("report Rep", reportRep);
-      report = JSON.parse(reportRep || "");
-    } catch {
-      report = { error: "Failed to parse resume" };
+      const reportRep = chatCompletion.choices[0].message.content;
+      let report;
+      try {
+        console.log("report Rep", reportRep);
+        report = JSON.parse(reportRep || "");
+      } catch {
+        report = { error: "Failed to parse resume" };
+      }
+
+      res.status(200).json({ report });
+    } catch (error) {
+      res.status(500).json({
+        error: error || "An error occurred while processing the resume",
+      });
     }
-
-    res.status(200).json({ report });
   } else {
     res.status(405).send("This is not working");
   }
