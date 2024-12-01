@@ -5,8 +5,12 @@ import { SkillsChart } from "../components/SkillsChart";
 import { CompanyExperienceChart } from "../components/CompanyExperienceChart";
 import { SkillsAnalysis } from "../components/SkillsAnalysis";
 import { RedFlags } from "../components/RedFlags";
-import { AISummary } from "../components/AISummary";
-import { Brain, Loader2, Download, Mail, Phone } from "lucide-react";
+import { Loader2, Download, Mail, Sparkles } from "lucide-react";
+import Header from "org/components/Header";
+import Footer from "org/components/Footer";
+import { useRouter } from "next/router";
+import { AISummary } from "org/components/AISummary";
+
 const mockSkillsData = [
   { name: "Technical Skills", value: 40 },
   { name: "Soft Skills", value: 30 },
@@ -61,16 +65,54 @@ const mockAISummary = {
   ],
 };
 
+type ResumeAnalysis = {
+  summary: string;
+  industry: string;
+  education_level: string;
+  ats_score: number;
+  experience_level: string;
+  total_years_of_experience: number;
+  key_strengths: string[];
+  area_of_improvements: string[];
+  best_for_roles: string[];
+  skills_distribution: {
+    name: string;
+    value: number;
+  }[];
+  company_experience: {
+    company: string;
+    years: number;
+  }[];
+  red_flags: {
+    issue: string;
+    severity: string;
+    description: string;
+    recommendation: string;
+  }[];
+  top_skills_analysis: {
+    name: string;
+    level: string;
+    relevance: number;
+  }[];
+  certifcate_acheivements: null;
+  contact_info: null;
+  potential_growth_strategies: null;
+  potential_job_fit: null;
+  industry_suitability: null;
+};
+
 function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [summary, setSummary] = useState("");
+  const [resumeReport, setResumeReport] = useState<ResumeAnalysis | null>(null);
+  const router = useRouter();
 
   const handleFileUpload = async (uploadedFile: File) => {
     try {
       // Check file size (5MB = 5 * 1024 * 1024 bytes)
       if (uploadedFile.size > 5 * 1024 * 1024) {
-        throw new Error("File size exceeds 5MB limit");
+        router.push("/error");
+        return;
       }
 
       setIsAnalyzing(true);
@@ -89,9 +131,10 @@ function Home() {
       const pdfData = atob(cleanBase64);
       const pageMatch = pdfData.match(/\/Type\s*\/Page\b/g);
       const pageCount = pageMatch ? pageMatch.length : 1;
-      
+
       if (pageCount > 4) {
-        throw new Error("Resume should not exceed 4 pages");
+        router.push("/error");
+        return;
       }
 
       const response = await fetch("/api/handle-resume-upload", {
@@ -105,20 +148,30 @@ function Home() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to analyze resume");
+        router.push("/error");
+        return;
       }
 
       const data = await response.json();
-      setSummary(data.summary);
+      if (data?.report === "false") {
+        router.push("/error");
+        return;
+      }
+
+      // Parse the string response into an object
+      const parsedReport =
+        typeof data.report === "string" ? JSON.parse(data.report) : data.report;
+      setResumeReport(parsedReport);
       setShowResults(true);
     } catch (error) {
       console.error("Error processing resume:", error);
-      // Handle error appropriately - maybe show error message to user
+      router.push("/error");
     } finally {
       setIsAnalyzing(false);
     }
+  };
 
-  };  const handleDownload = () => {
+  const handleDownload = () => {
     // Implementation for downloading report
     console.log("Downloading report...");
   };
@@ -128,19 +181,10 @@ function Home() {
     console.log("Emailing report...");
   };
 
+  console.log("Resume report: ", resumeReport);
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-2">
-            <Brain className="w-8 h-8 text-blue-500" />
-            <h1 className="text-2xl font-bold text-gray-900">
-              Resume Analyzer AI
-            </h1>
-          </div>
-        </div>
-      </header>
-
+      <Header />
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {!showResults && (
           <div className="max-w-2xl mx-auto">
@@ -166,28 +210,38 @@ function Home() {
         {showResults && (
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <AnalysisCard title="Overall Score" value="85%" type="overall" />
-              <AnalysisCard title="Skills Match" value="92%" type="skills" />
+              <AnalysisCard
+                title="ATS Score"
+                value={resumeReport?.ats_score || "N/A"}
+                type="overall"
+              />
+              <AnalysisCard
+                value={
+                  resumeReport?.total_years_of_experience + " years" || "N/A"
+                }
+                title="Total Experience"
+                type="skills"
+              />
               <AnalysisCard
                 title="Experience Level"
-                value="Senior"
+                value={resumeReport?.experience_level || "N/A"}
                 type="experience"
               />
               <AnalysisCard
-                title="Education Match"
-                value="95%"
+                title="Education Level"
+                value={resumeReport?.education_level || "N/A"}
                 type="education"
               />
             </div>
 
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                AI Summary
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex gap-x-2">
+                AI Summary <Sparkles className="w-5 h-5 text-purple-500 mt-1" />
               </h3>
               <AISummary
-                summary={summary}
-                strengths={mockAISummary.strengths}
-                improvements={mockAISummary.improvements}
+                summary={resumeReport?.summary || ""}
+                strengths={resumeReport?.key_strengths || []}
+                improvements={resumeReport?.area_of_improvements || []}
               />
             </div>
 
@@ -240,35 +294,8 @@ function Home() {
           </div>
         )}
       </main>
-      <footer className="mt-auto border-t border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col items-center text-gray-600 space-y-2">
-            <div className="flex items-center">
-              Made by{" "}
-              <a
-                href="https://www.linkedin.com/in/shehzadasalman/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:text-blue-600 font-medium ml-1 transition-colors"
-              >
-                shehzada salman
-              </a>
-            </div>
-            <div className="flex flex-col items-center text-sm">
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                <span>shehzada.salman072@gmail.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                <span>+92 (321) 883-5830</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
-
 }
 export default Home;
