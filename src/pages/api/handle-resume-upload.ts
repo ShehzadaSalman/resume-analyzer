@@ -2,9 +2,9 @@ import pdf from "pdf-parse";
 import OpenAI from "openai";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const client = new OpenAI({
-  apiKey: process.env.OPEN_AI_APIKEY || "",
-});
+if (!process.env.OPEN_AI_APIKEY) {
+  throw new Error("OPEN_AI_APIKEY environment variable is not set");
+}
 
 const resumeAnalysis = {
   summary: "",
@@ -55,6 +55,16 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     try {
+      if (!process.env.OPEN_AI_APIKEY) {
+        return res
+          .status(500)
+          .json({ error: "OpenAI API key is not configured" });
+      }
+
+      const client = new OpenAI({
+        apiKey: process.env.OPEN_AI_APIKEY,
+      });
+
       const file = req.body.file; // Assuming the PDF is sent as base64
 
       // Parse the PDF file
