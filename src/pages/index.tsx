@@ -130,6 +130,7 @@ function Home() {
         }),
       });
 
+      console.log("Response from api: ", response);
       if (!response.ok) {
         router.push("/error");
         return;
