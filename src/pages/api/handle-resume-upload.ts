@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const client = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPEN_AI_APIKEY || "",
+  apiKey: process.env.OPEN_AI_APIKEY || "",
 });
 
 const resumeAnalysis = {
