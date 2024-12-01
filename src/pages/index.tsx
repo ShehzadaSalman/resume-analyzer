@@ -48,23 +48,6 @@ const mockRedFlags = [
   },
 ] as const;
 
-const mockAISummary = {
-  summary:
-    "Strong technical background with expertise in modern web technologies. Shows consistent career progression but could benefit from more leadership experience. Well-suited for senior developer roles with potential for technical leadership positions.",
-  strengths: [
-    "Extensive experience with React and TypeScript",
-    "Strong problem-solving abilities",
-    "Proven track record of successful project delivery",
-    "Good communication skills evident in resume",
-  ],
-  improvements: [
-    "Consider adding more quantifiable achievements",
-    "Expand leadership experience",
-    "Add relevant certifications",
-    "Include more industry-specific keywords",
-  ],
-};
-
 type ResumeAnalysis = {
   summary: string;
   industry: string;
