@@ -2,10 +2,6 @@ import pdf from "pdf-parse";
 import OpenAI from "openai";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-if (!process.env.OPEN_AI_APIKEY) {
-  throw new Error("OPEN_AI_APIKEY environment variable is not set");
-}
-
 const resumeAnalysis = {
   summary: "",
   industry: "",
@@ -137,10 +133,13 @@ export default async function handler(
           
           Respond strictly in the format of the ${JSON.stringify(
             resumeAnalysis
-          )} object, ensuring all fields are populated with meaningful, data-driven insights.`,
+          )} json object, ensuring all fields are populated with meaningful, data-driven insights.`,
           },
         ],
         model: "gpt-4o-mini",
+        response_format: {
+          type: "json_object",
+        },
         max_tokens: 1000,
       });
 
@@ -148,7 +147,7 @@ export default async function handler(
       let report;
       try {
         console.log("report Rep", reportRep);
-        report = JSON.parse(reportRep || "");
+        report = reportRep || "";
       } catch {
         report = { error: "Failed to parse resume" };
       }

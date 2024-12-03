@@ -143,9 +143,10 @@ function Home() {
       }
 
       // Parse the string response into an object
-      const parsedReport =
-        typeof data.report === "string" ? JSON.parse(data.report) : data.report;
-      setResumeReport(parsedReport);
+
+      console.log("Data: ", typeof JSON.parse(data.report));
+
+      setResumeReport(JSON.parse(data.report));
       setShowResults(true);
     } catch (error) {
       console.error("Error processing resume:", error);
