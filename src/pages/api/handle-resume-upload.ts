@@ -136,11 +136,11 @@ export default async function handler(
           )} json object, ensuring all fields are populated with meaningful, data-driven insights.`,
           },
         ],
-        model: "gpt-4o-mini",
+        model: "gpt-3.5-turbo",
         response_format: {
           type: "json_object",
         },
-        max_tokens: 1000,
+        max_tokens: 500,
       });
 
       const reportRep = chatCompletion.choices[0].message.content;
