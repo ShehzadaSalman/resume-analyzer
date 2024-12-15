@@ -22,10 +22,10 @@ function Footer() {
               <Mail className="w-4 h-4" />
               <span>shehzada.salman072@gmail.com</span>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <Phone className="w-4 h-4" />
               <span>+92 (321) 883-5830</span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

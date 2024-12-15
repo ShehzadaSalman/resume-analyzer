@@ -146,7 +146,6 @@ export default async function handler(
       const reportRep = chatCompletion.choices[0].message.content;
       let report;
       try {
-        console.log("report Rep", reportRep);
         report = reportRep || "";
       } catch {
         report = { error: "Failed to parse resume" };

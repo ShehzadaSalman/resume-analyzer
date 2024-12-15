@@ -131,6 +131,7 @@ function Home() {
       });
 
       console.log("Response from api: ", response);
+      console.log("Response from api body: ", response.body);
       if (!response.ok) {
         router.push("/error");
         return;
@@ -141,10 +142,6 @@ function Home() {
         router.push("/error");
         return;
       }
-
-      // Parse the string response into an object
-
-      console.log("Data: ", typeof JSON.parse(data.report));
 
       setResumeReport(JSON.parse(data.report));
       setShowResults(true);
